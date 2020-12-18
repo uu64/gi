@@ -9,8 +9,8 @@ import (
 func main() {
 	ctx := context.Background()
 	client := github.NewClient(nil)
-	repos, resp, err := client.Repositories.ListByOrg(ctx, "github", nil)
-	println(repos)
-	println(resp)
-	println(err)
+	repos, _, _ := client.Repositories.List(ctx, "uu64", nil)
+	for _, repo := range repos {
+		println(*repo.Name)
+	}
 }

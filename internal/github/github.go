@@ -2,19 +2,14 @@ package github
 
 import (
 	"context"
-	"sync"
 
 	"github.com/google/go-github/v33/github"
 )
 
-var once sync.Once
 var client *github.Client
 
-func getClient() *github.Client {
-	once.Do(func() {
-		client = github.NewClient(nil)
-	})
-	return client
+func init() {
+	client = github.NewClient(nil)
 }
 
 func GetGitIgnores() {
@@ -31,6 +26,6 @@ func GetGitIgnores() {
 
 	_, contents, _, _ := client.Repositories.GetContents(ctx, owner, repo, path, opts)
 	for _, content := range contents {
-		println(content.GetName)
+		println(content.GetName())
 	}
 }

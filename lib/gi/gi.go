@@ -3,46 +3,55 @@ package gi
 import (
 	"context"
 	"strings"
-
-	"github.com/uu64/gi/lib/github"
 )
 
-type VCS interface {
-	GetAllContentPaths(ctx context.Context, owner, repo, ref, path string) []string
-}
+const gitignoreExt = "gitignore"
 
 type Gi struct {
-	vcs VCS
+	vcs   VCS
+	owner string
+	repo  string
+	path  string
+	ref   string
 }
 
-func New() *Gi {
+func New(vcs VCS, owner, repo, path, ref string) *Gi {
 	gi := Gi{
-		vcs: github.New(),
+		vcs:   vcs,
+		owner: owner,
+		repo:  repo,
+		path:  path,
+		ref:   ref,
 	}
 	return &gi
 }
 
 func (gi *Gi) ListGitIgnore() []string {
 	gitignores := []string{}
+
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
 
-	// TODO: Should be loaded from config
-	owner := "github"
-	repo := "gitignore"
-	path := "/"
-	branch := "master"
+	files := gi.vcs.GetAllFiles(ctx, gi.owner, gi.repo, gi.ref, gi.path)
 
-	paths := gi.vcs.GetAllContentPaths(ctx, owner, repo, branch, path)
-
-	for _, path := range paths {
-		if strings.HasSuffix(path, "gitignore") {
-			gitignores = append(gitignores, path)
+	for _, file := range files {
+		if strings.HasSuffix(file.Path, gitignoreExt) {
+			gitignores = append(gitignores, file.Path)
 		}
 	}
 	return gitignores
 }
 
-func Download(query []string) {
+func (gi *Gi) Download(paths []string) []*string {
+	contents := []*string{}
 
+	// TODO: Should be reconsidered if it is empty
+	ctx := context.Background()
+
+	for _, path := range paths {
+		content := gi.vcs.GetFileContent(ctx, gi.owner, gi.repo, gi.ref, path)
+		contents = append(contents, content)
+	}
+
+	return contents
 }

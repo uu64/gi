@@ -1,17 +1,27 @@
 package main
 
 import (
+	"os"
+
 	"github.com/AlecAivazis/survey/v2"
-	"github.com/uu64/gi/internal/github"
+	"github.com/uu64/gi/lib/gi"
 )
 
 func main() {
+	defer func() {
+		err := recover()
+		if err != nil {
+			os.Exit(1)
+		}
+	}()
+	cmd := gi.New()
+
 	days := []string{}
 	prompt := &survey.MultiSelect{
 		Message: "What days do you prefer:",
-		Options: []string{"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"},
+		Options: cmd.ListGitIgnore(),
 	}
 	survey.AskOne(prompt, &days)
 
-	github.GetGitIgnores()
+	os.Exit(0)
 }

@@ -2,40 +2,42 @@ package github
 
 import (
 	"context"
-	"strings"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/uu64/gi/lib/gi"
 )
 
+// Github is implementation of the github repository.
 type Github struct {
 	client *github.Client
 }
 
+// New returns a Github object.
 func New() *Github {
 	return &Github{
 		client: github.NewClient(nil),
 	}
 }
 
-func (gh *Github) GetAllFiles(ctx context.Context, owner, repo, ref, path string) []gi.File {
-	contents := []gi.File{}
+// ListAllContents returns the list that contains the Content object.
+func (gh *Github) ListAllContents(ctx context.Context, owner, repo, ref, path string) []*gi.Content {
+	contents := []*gi.Content{}
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = ref
 
 	// TODO: error handling
 	tree, _, _ := gh.client.Git.GetTree(ctx, owner, repo, ref, true)
 	for _, entry := range tree.Entries {
-		if strings.Compare(*entry.Type, "blob") == 0 {
-			file := gi.File{
-				Path: entry.GetPath(),
-			}
-			contents = append(contents, file)
+		file := gi.Content{
+			Type: getContentType(entry.GetType()),
+			Path: entry.GetPath(),
 		}
+		contents = append(contents, &file)
 	}
 	return contents
 }
 
+// GetFileContent returns the decoded content of the specified file.
 func (gh *Github) GetFileContent(ctx context.Context, owner, repo, ref, path string) *string {
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = ref
@@ -45,4 +47,19 @@ func (gh *Github) GetFileContent(ctx context.Context, owner, repo, ref, path str
 	data, _ := content.GetContent()
 
 	return &data
+}
+
+func getContentType(treeEntryType string) gi.ContentType {
+	switch treeEntryType {
+	case "blob":
+		return gi.File
+	case "directory":
+		return gi.Directory
+	case "symlink":
+		return gi.SymLink
+	case "submodule":
+		return gi.Submodule
+	default:
+		return -1
+	}
 }

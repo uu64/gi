@@ -15,19 +15,19 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	vcs := github.New()
+	repository := github.New()
 
 	// TODO: Should be loaded from config
 	owner := "github"
 	repo := "gitignore"
 	path := "/"
 	ref := "master"
-	cmd := gi.New(vcs, owner, repo, path, ref)
+	cmd := gi.New(repository, owner, repo, path, ref)
 
 	days := []string{}
 	prompt := &survey.MultiSelect{
 		Message: "What days do you prefer:",
-		Options: cmd.ListGitIgnore(),
+		Options: cmd.ListGitIgnorePath(),
 	}
 	survey.AskOne(prompt, &days)
 

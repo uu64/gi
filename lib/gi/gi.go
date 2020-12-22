@@ -7,32 +7,35 @@ import (
 
 const gitignoreExt = "gitignore"
 
+// Gi is the object containing everything required to run gi.
 type Gi struct {
-	vcs   VCS
-	owner string
-	repo  string
-	path  string
-	ref   string
+	repository Repository
+	owner      string
+	repo       string
+	path       string
+	ref        string
 }
 
-func New(vcs VCS, owner, repo, path, ref string) *Gi {
+// New returns a Gi object.
+func New(repository Repository, owner, repo, path, ref string) *Gi {
 	gi := Gi{
-		vcs:   vcs,
-		owner: owner,
-		repo:  repo,
-		path:  path,
-		ref:   ref,
+		repository: repository,
+		owner:      owner,
+		repo:       repo,
+		path:       path,
+		ref:        ref,
 	}
 	return &gi
 }
 
-func (gi *Gi) ListGitIgnore() []string {
+// ListGitIgnorePath returns the list that contains the filepath of gitignore.
+func (gi *Gi) ListGitIgnorePath() []string {
 	gitignores := []string{}
 
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
 
-	files := gi.vcs.GetAllFiles(ctx, gi.owner, gi.repo, gi.ref, gi.path)
+	files := gi.repository.ListAllContents(ctx, gi.owner, gi.repo, gi.ref, gi.path)
 
 	for _, file := range files {
 		if strings.HasSuffix(file.Path, gitignoreExt) {
@@ -42,6 +45,7 @@ func (gi *Gi) ListGitIgnore() []string {
 	return gitignores
 }
 
+// Download returns the list that contains the decoded content of gitignore.
 func (gi *Gi) Download(paths []string) []*string {
 	contents := []*string{}
 
@@ -49,7 +53,7 @@ func (gi *Gi) Download(paths []string) []*string {
 	ctx := context.Background()
 
 	for _, path := range paths {
-		content := gi.vcs.GetFileContent(ctx, gi.owner, gi.repo, gi.ref, path)
+		content := gi.repository.GetFileContent(ctx, gi.owner, gi.repo, gi.ref, path)
 		contents = append(contents, content)
 	}
 

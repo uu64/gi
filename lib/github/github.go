@@ -26,13 +26,16 @@ func (gh *Github) ListAllContents(ctx context.Context, owner, repo, ref, path st
 	opts.Ref = ref
 
 	// TODO: error handling
-	tree, _, _ := gh.client.Git.GetTree(ctx, owner, repo, ref, true)
+	tree, _, _ := gh.client.Git.GetTree(ctx, owner, repo, ref, false)
 	for _, entry := range tree.Entries {
-		file := gi.Content{
-			Type: getContentType(entry.GetType()),
-			Path: entry.GetPath(),
+		ct := getContentType(entry.GetType())
+		if ct == gi.CtFile {
+			file := gi.Content{
+				Type: ct,
+				Path: entry.GetPath(),
+			}
+			contents = append(contents, &file)
 		}
-		contents = append(contents, &file)
 	}
 	return contents
 }
@@ -52,14 +55,15 @@ func (gh *Github) GetFileContent(ctx context.Context, owner, repo, ref, path str
 func getContentType(treeEntryType string) gi.ContentType {
 	switch treeEntryType {
 	case "blob":
-		return gi.File
-	case "directory":
-		return gi.Directory
+		return gi.CtFile
+	case "tree":
+		return gi.CtDirectory
 	case "symlink":
-		return gi.SymLink
+		return gi.CtSymLink
 	case "submodule":
-		return gi.Submodule
+		return gi.CtSubmodule
 	default:
+		// If TreeEntry is unknown object, this returns -1.
 		return -1
 	}
 }

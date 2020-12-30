@@ -35,11 +35,11 @@ func (gi *Gi) ListGitIgnorePath() []string {
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
 
-	files := gi.repository.ListAllContents(ctx, gi.owner, gi.repo, gi.ref, gi.path)
+	paths := gi.repository.ListAllFilePaths(ctx, gi.owner, gi.repo, gi.ref, gi.path)
 
-	for _, file := range files {
-		if strings.HasSuffix(file.Path, gitignoreExt) {
-			gitignores = append(gitignores, file.Path)
+	for _, path := range *paths {
+		if strings.HasSuffix(path, gitignoreExt) {
+			gitignores = append(gitignores, path)
 		}
 	}
 	return gitignores

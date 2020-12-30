@@ -2,57 +2,33 @@ package github
 
 import (
 	"context"
-	"reflect"
+	"sort"
 	"testing"
 
-	"github.com/uu64/gi/lib/gi"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestListAllContents(t *testing.T) {
-	expect := []*gi.Content{
-		&gi.Content{
-			Path: ".gitmodules",
-			Type: gi.CtFile,
-		},
-		&gi.Content{
-			Path: "LICENSE",
-			Type: gi.CtFile,
-		},
-		&gi.Content{
-			Path: "README.md",
-			Type: gi.CtFile,
-		},
-		&gi.Content{
-			Path: "testdocument.txt",
-			Type: gi.CtFile,
-		},
-		&gi.Content{
-			Path: "docs",
-			Type: gi.CtDirectory,
-		},
-		&gi.Content{
-			Path: "ghapi-test",
-			Type: gi.CtSubmodule,
-		},
-		&gi.Content{
-			Path: "docs/testdocument.txt",
-			Type: gi.CtFile,
-		},
+	expected := []string{
+		"README.md",
+		".gitmodules",
+		"LICENSE",
+		"testdocument.txt",
+		"docs/testdocument.txt",
 	}
-
 	gh := New()
-	if gh == nil {
-		t.Fatal("sum(1,2)shouldbe3,butdoesn'tmatch")
-	}
 
-	t.Run("can list all contents.", func(t *testing.T) {
+	t.Run("can list all file paths sorted by ascii code.", func(t *testing.T) {
 		ctx := context.Background()
 		owner := "uu64"
 		repo := "ghapi-test"
 		ref := "main"
 		path := "/"
 
-		contents := gh.ListAllContents(ctx, owner, repo, ref, path)
-		reflect.DeepEqual(expect, contents)
+		paths := gh.ListAllFilePaths(ctx, owner, repo, ref, path)
+		sort.Slice(expected, func(i, j int) bool {
+			return expected[i] < expected[j]
+		})
+		assert.Equal(t, expected, *paths)
 	})
 }

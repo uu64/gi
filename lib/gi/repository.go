@@ -4,6 +4,6 @@ import "context"
 
 // Repository is the place that stores gitignore files
 type Repository interface {
-	ListAllContents(ctx context.Context, owner, repo, ref, path string) []*Content
+	ListAllFilePaths(ctx context.Context, owner, repo, ref, path string) *[]string
 	GetFileContent(ctx context.Context, owner, repo, ref, path string) *string
 }

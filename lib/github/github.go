@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"sort"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/uu64/gi/lib/gi"
@@ -19,22 +20,26 @@ func New() *Github {
 	}
 }
 
-// ListAllContents returns the list that contains the Content object.
-func (gh *Github) ListAllContents(ctx context.Context, owner, repo, ref, path string) []*gi.Content {
-	contents := []*gi.Content{}
+// ListAllFilePaths returns a pointer to a slice containing the paths of all files sorted by ascii code.
+// The slice does not include the paths of objects other than files (ex: directories, submodules...).
+func (gh *Github) ListAllFilePaths(ctx context.Context, owner, repo, ref, path string) *[]string {
+	contents := []string{}
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = ref
 
 	// TODO: error handling
 	tree, _, _ := gh.client.Git.GetTree(ctx, owner, repo, ref, true)
 	for _, entry := range tree.Entries {
-		file := gi.Content{
-			Type: getContentType(entry.GetType()),
-			Path: entry.GetPath(),
+		ct := getContentType(entry.GetType())
+		if ct == gi.CtFile {
+			contents = append(contents, entry.GetPath())
 		}
-		contents = append(contents, &file)
 	}
-	return contents
+
+	sort.Slice(contents, func(i, j int) bool {
+		return contents[i] < contents[j]
+	})
+	return &contents
 }
 
 // GetFileContent returns the decoded content of the specified file.

@@ -22,13 +22,16 @@ func New() *Github {
 
 // ListAllFilePaths returns a pointer to a slice containing the paths of all files sorted by ascii code.
 // The slice does not include the paths of objects other than files (ex: directories, submodules...).
-func (gh *Github) ListAllFilePaths(ctx context.Context, owner, repo, ref, path string) *[]string {
+func (gh *Github) ListAllFilePaths(ctx context.Context, owner, repo, ref, path string) (*[]string, error) {
 	contents := []string{}
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = ref
 
-	// TODO: error handling
-	tree, _, _ := gh.client.Git.GetTree(ctx, owner, repo, ref, true)
+	tree, _, err := gh.client.Git.GetTree(ctx, owner, repo, ref, true)
+	if err != nil {
+		return nil, err
+	}
+
 	for _, entry := range tree.Entries {
 		ct := getContentType(entry.GetType())
 		if ct == gi.CtFile {
@@ -39,7 +42,7 @@ func (gh *Github) ListAllFilePaths(ctx context.Context, owner, repo, ref, path s
 	sort.Slice(contents, func(i, j int) bool {
 		return contents[i] < contents[j]
 	})
-	return &contents
+	return &contents, nil
 }
 
 // GetFileContent returns the decoded content of the specified file.

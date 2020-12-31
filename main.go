@@ -45,12 +45,8 @@ func main() {
 		Default: "./.gitignore",
 	}
 	survey.AskOne(input, &outputPath)
-	fmt.Println(outputPath)
 
-	contents := cmd.Download(selected)
-	for _, content := range contents {
-		fmt.Println(*content)
-	}
+	cmd.Download(outputPath, selected)
 
 	os.Exit(0)
 }

@@ -1,7 +1,10 @@
 package gi
 
 import (
+	"bufio"
 	"context"
+	"fmt"
+	"os"
 	"strings"
 )
 
@@ -49,17 +52,41 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 }
 
 // Download returns the list that contains the decoded content of gitignore.
-func (gi *Gi) Download(paths []string) []*string {
+func (gi *Gi) Download(outputPath string, selected []string) []*string {
 	contents := []*string{}
 
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
 
-	for _, path := range paths {
-		sha := pathHashMap[path]
+	for _, item := range selected {
+		sha := pathHashMap[item]
 		content, _ := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, *sha)
 		contents = append(contents, content)
 	}
+	gi.write(outputPath, contents)
 
 	return contents
+}
+
+func (gi *Gi) write(path string, contents []*string) error {
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	writer := bufio.NewWriter(file)
+
+	for _, content := range contents {
+		fmt.Println(*content)
+		// TODO: error handling
+		_, err := writer.WriteString(*content)
+		if err != nil {
+			fmt.Println(err)
+			return err
+		}
+	}
+
+	writer.Flush()
+	return nil
 }

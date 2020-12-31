@@ -17,6 +17,7 @@ type Gi struct {
 }
 
 // New returns a Gi object.
+// TODO: refactor
 func New(vcs VCS, owner, repo, path, ref string) *Gi {
 	gi := Gi{
 		vcs:   vcs,

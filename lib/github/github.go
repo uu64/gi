@@ -2,6 +2,7 @@ package github
 
 import (
 	"context"
+	"encoding/base64"
 	"sort"
 
 	"github.com/google/go-github/v33/github"
@@ -13,62 +14,57 @@ type Github struct {
 	client *github.Client
 }
 
-// New returns a Github object.
-func New() *Github {
+// New returns a new Github object.
+func NewGithub() *Github {
 	return &Github{
 		client: github.NewClient(nil),
 	}
 }
 
-// ListAllFilePaths returns a pointer to a slice containing the paths of all files sorted by ascii code.
-// The slice does not include the paths of objects other than files (ex: directories, submodules...).
-func (gh *Github) ListAllFilePaths(ctx context.Context, owner, repo, ref, path string) (*[]string, error) {
-	contents := []string{}
+// GetTree returns a slice of contents sorted by the path.
+func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursive bool) ([]*gi.TreeNode, error) {
+	contents := []*gi.TreeNode{}
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = ref
 
-	tree, _, err := gh.client.Git.GetTree(ctx, owner, repo, ref, true)
+	tree, _, err := gh.client.Git.GetTree(ctx, owner, repo, ref, recursive)
 	if err != nil {
 		return nil, err
 	}
 
 	for _, entry := range tree.Entries {
-		ct := getContentType(entry.GetType())
-		if ct == gi.CtFile {
-			contents = append(contents, entry.GetPath())
-		}
+		node := gi.NewTreeNode(getNodeType(entry.GetType()), entry.GetPath())
+		contents = append(contents, node)
 	}
 
 	sort.Slice(contents, func(i, j int) bool {
-		return contents[i] < contents[j]
+		return *contents[i].Path < *contents[j].Path
 	})
-	return &contents, nil
+	return contents, nil
 }
 
-// GetFileContent returns the decoded content of the specified file.
-func (gh *Github) GetFileContent(ctx context.Context, owner, repo, ref, path string) *string {
-	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = ref
-
+// GetBlob returns the decoded content of the specified SHA.
+func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (string , error) {
 	// TODO: error handling
-	content, _, _, _ := gh.client.Repositories.GetContents(ctx, owner, repo, path, opts)
-	data, _ := content.GetContent()
+	blob, _, err := gh.client.Git.GetBlob(ctx, owner, repo, sha)
+	if err != nil {
+		return "", err
+	}
 
-	return &data
+	content := blob.GetContent()
+	decoded_content, err := base64.StdEncoding.DecodeString(content)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decoded_content), nil
 }
 
-func getContentType(treeEntryType string) gi.ContentType {
-	switch treeEntryType {
-	case "blob":
-		return gi.CtFile
-	case "tree":
-		return gi.CtDirectory
-	case "commit":
-		return gi.CtSubmodule
-	case "symlink":
-		return gi.CtSymLink
-	default:
-		// If TreeEntry is unknown object, this returns -1.
-		return -1
+func getNodeType(treeEntryType string) gi.NodeType {
+	nodeTypeMap := map[string]gi.NodeType{
+		"blob":   gi.NtBlob,
+		"tree":   gi.NtTree,
+		"commit": gi.NtSubmodule,
 	}
+	return nodeTypeMap[treeEntryType]
 }

@@ -33,7 +33,7 @@ func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursiv
 	}
 
 	for _, entry := range tree.Entries {
-		node := gi.NewTreeNode(getNodeType(entry.GetType()), entry.GetPath())
+		node := gi.NewTreeNode(getNodeType(entry.GetType()), entry.GetPath(), entry.GetSHA())
 		contents = append(contents, node)
 	}
 
@@ -44,20 +44,21 @@ func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursiv
 }
 
 // GetBlob returns the decoded content of the specified SHA.
-func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (string , error) {
+func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (*string , error) {
 	// TODO: error handling
 	blob, _, err := gh.client.Git.GetBlob(ctx, owner, repo, sha)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	content := blob.GetContent()
-	decoded_content, err := base64.StdEncoding.DecodeString(content)
+	bytes, err := base64.StdEncoding.DecodeString(content)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return string(decoded_content), nil
+	decoded_content := string(bytes)
+	return &decoded_content, nil
 }
 
 func getNodeType(treeEntryType string) gi.NodeType {

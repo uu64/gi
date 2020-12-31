@@ -21,12 +21,30 @@ func TestGetTree(t *testing.T) {
 
 	t.Run("can get contents sorted by path (not recursively)", func(t *testing.T) {
 		expected := []*gi.TreeNode{
-			gi.NewTreeNode(gi.NtBlob, "README.md"),
-			gi.NewTreeNode(gi.NtBlob, ".gitmodules"),
-			gi.NewTreeNode(gi.NtBlob, "LICENSE"),
-			gi.NewTreeNode(gi.NtBlob, "testdocument.txt"),
-			gi.NewTreeNode(gi.NtTree, "docs"),
-			gi.NewTreeNode(gi.NtSubmodule, "ghapi-test"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"README.md",
+				"6799dc110eaa15880d42c0b447013c30422dc527"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				".gitmodules",
+				"1a41f17d2c803f43f316adb1cf07e6b9cbfbda3d"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"LICENSE",
+				"c46410aef77ff7fbe2f44815ac5ca8fb351d190f"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"testdocument.txt",
+				"d6455f8dde4bd5300e65467b170f7485f4ab77e7"),
+			gi.NewTreeNode(
+				gi.NtTree,
+				"docs",
+				"633ec3e50dafa8ca1d9b87763fd2bf1f90dd77b1"),
+			gi.NewTreeNode(
+				gi.NtSubmodule,
+				"ghapi-test",
+				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
 		ctx := context.Background()
 		owner := "uu64"
@@ -49,13 +67,34 @@ func TestGetTree(t *testing.T) {
 
 	t.Run("can get all contents sorted by the path", func(t *testing.T) {
 		expected := []*gi.TreeNode{
-			gi.NewTreeNode(gi.NtBlob, "README.md"),
-			gi.NewTreeNode(gi.NtBlob, ".gitmodules"),
-			gi.NewTreeNode(gi.NtBlob, "LICENSE"),
-			gi.NewTreeNode(gi.NtBlob, "testdocument.txt"),
-			gi.NewTreeNode(gi.NtBlob, "docs/testdocument.txt"),
-			gi.NewTreeNode(gi.NtTree, "docs"),
-			gi.NewTreeNode(gi.NtSubmodule, "ghapi-test"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"README.md",
+				"6799dc110eaa15880d42c0b447013c30422dc527"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				".gitmodules",
+				"1a41f17d2c803f43f316adb1cf07e6b9cbfbda3d"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"LICENSE",
+				"c46410aef77ff7fbe2f44815ac5ca8fb351d190f"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"testdocument.txt",
+				"d6455f8dde4bd5300e65467b170f7485f4ab77e7"),
+			gi.NewTreeNode(
+				gi.NtBlob,
+				"docs/testdocument.txt",
+				"a0f31e800f7bb4493ad94210b9f1770f6334531f"),
+			gi.NewTreeNode(
+				gi.NtTree,
+				"docs",
+				"633ec3e50dafa8ca1d9b87763fd2bf1f90dd77b1"),
+			gi.NewTreeNode(
+				gi.NtSubmodule,
+				"ghapi-test",
+				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
 		ctx := context.Background()
 		owner := "uu64"
@@ -101,7 +140,7 @@ func TestGetBlob(t *testing.T) {
 
 		blob, err := gh.GetBlob(ctx, owner, repo, sha)
 		if assert.NoError(t, err) {
-			assert.Equal(t, expected, blob)
+			assert.Equal(t, expected, *blob)
 		}
 	})
 

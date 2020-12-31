@@ -15,14 +15,13 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-	vcs := github.New()
+	vcs := github.NewGithub()
 
 	// TODO: Should be loaded from config
 	owner := "github"
 	repo := "gitignore"
-	path := "/"
 	ref := "master"
-	cmd := gi.New(vcs, owner, repo, path, ref)
+	cmd := gi.NewGi(vcs, owner, repo, ref)
 
 	// TODO: error handling
 	gitignores, _ := cmd.ListGitIgnorePath()

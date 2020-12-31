@@ -6,7 +6,8 @@ import (
 )
 
 const gitignoreExt = ".gitignore"
-// var pathHashMap map[string]*string
+
+var pathHashMap = make(map[string]*string)
 
 // Gi is the object containing everything required to run gi.
 type Gi struct {
@@ -40,7 +41,7 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 
 	for _, content := range contents {
 		if strings.HasSuffix(*content.Path, gitignoreExt) {
-			// pathHashMap[*content.Path]
+			pathHashMap[*content.Path] = content.SHA
 			gitignores = append(gitignores, *content.Path)
 		}
 	}
@@ -48,14 +49,15 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 }
 
 // Download returns the list that contains the decoded content of gitignore.
-func (gi *Gi) Download(shas []string) []*string {
+func (gi *Gi) Download(paths []string) []*string {
 	contents := []*string{}
 
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
 
-	for _, sha := range shas {
-		content, _ := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, sha)
+	for _, path := range paths {
+		sha := pathHashMap[path]
+		content, _ := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, *sha)
 		contents = append(contents, content)
 	}
 

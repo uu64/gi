@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -12,6 +13,7 @@ func main() {
 	defer func() {
 		err := recover()
 		if err != nil {
+			fmt.Println(err)
 			os.Exit(1)
 		}
 	}()
@@ -24,14 +26,31 @@ func main() {
 	cmd := gi.NewGi(vcs, owner, repo, ref)
 
 	// TODO: error handling
-	gitignores, _ := cmd.ListGitIgnorePath()
+	gitignores, err := cmd.ListGitIgnorePath()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	days := []string{}
-	prompt := &survey.MultiSelect{
-		Message: "What days do you prefer:",
+	selected := []string{}
+	multiSelection := &survey.MultiSelect{
+		Message: "Select gitignore templates:",
 		Options: gitignores,
 	}
-	survey.AskOne(prompt, &days)
+	survey.AskOne(multiSelection, &selected)
+
+	outputPath := ""
+	input := &survey.Input{
+		Message: "Output path:",
+		Default: "./.gitignore",
+	}
+	survey.AskOne(input, &outputPath)
+	fmt.Println(outputPath)
+
+	contents := cmd.Download(selected)
+	for _, content := range contents {
+		fmt.Println(*content)
+	}
 
 	os.Exit(0)
 }

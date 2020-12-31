@@ -9,3 +9,8 @@ setup:
 lint:
 	go vet ./...
 	golint -set_exit_status ./...
+
+.PHONY: test
+test:
+	go test ./lib/gi
+	go test ./lib/github

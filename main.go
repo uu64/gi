@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/AlecAivazis/survey/v2"
 	"github.com/uu64/gi/lib/gi"
 	"github.com/uu64/gi/lib/github"
+	"github.com/uu64/gi/lib/tui"
 )
 
 func main() {
@@ -33,18 +33,10 @@ func main() {
 	}
 
 	selected := []string{}
-	multiSelection := &survey.MultiSelect{
-		Message: "Select gitignore templates:",
-		Options: gitignores,
-	}
-	survey.AskOne(multiSelection, &selected)
+	tui.ShowGitIgnoreOption(&gitignores, &selected)
 
 	outputPath := ""
-	input := &survey.Input{
-		Message: "Output path:",
-		Default: "./.gitignore",
-	}
-	survey.AskOne(input, &outputPath)
+	tui.ShowOutputPathInput(&outputPath)
 
 	cmd.Download(outputPath, selected)
 

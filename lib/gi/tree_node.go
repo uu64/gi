@@ -17,7 +17,7 @@ const (
 type TreeNode struct {
 	Type NodeType
 	Path *string
-	SHA *string
+	SHA  *string
 }
 
 // NewTreeNode returns a new TreeNode object.
@@ -25,6 +25,6 @@ func NewTreeNode(nodeType NodeType, path string, sha string) *TreeNode {
 	return &TreeNode{
 		Type: nodeType,
 		Path: &path,
-		SHA: &sha,
+		SHA:  &sha,
 	}
 }

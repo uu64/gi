@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	cmdConfig "github.com/uu64/gi/lib/config"
 	"github.com/uu64/gi/lib/gi"
 	"github.com/uu64/gi/lib/github"
 	"github.com/uu64/gi/lib/tui"
@@ -18,12 +19,8 @@ func main() {
 		}
 	}()
 	vcs := github.NewGithub()
-
-	// TODO: Should be loaded from config
-	owner := "github"
-	repo := "gitignore"
-	ref := "master"
-	cmd := gi.NewGi(vcs, owner, repo, ref)
+	rc := cmdConfig.GetRemoteConfig()
+	cmd := gi.NewGi(vcs, rc.Owner, rc.Repository, rc.Ref)
 
 	// TODO: error handling
 	gitignores, err := cmd.ListGitIgnorePath()
@@ -32,8 +29,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	tc := cmdConfig.GetTuiConfig()
 	selected := []string{}
-	tui.ShowGitIgnoreOption(&gitignores, &selected)
+	tui.ShowGitIgnoreOption(&gitignores, &selected, tc.PageSize)
 
 	outputPath := ""
 	tui.ShowOutputPathInput(&outputPath)

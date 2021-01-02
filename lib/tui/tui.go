@@ -3,15 +3,17 @@ package tui
 import "github.com/AlecAivazis/survey/v2"
 
 const (
-	multiSelectionMsg = "Select gitignore templates:"
+	multiSelectMsg = "Select gitignore templates:"
 	inputMsg = "Output path:"
 	defaultOutputPath = "./.gitignore"
 )
 
-func ShowGitIgnoreOption(options, selected *[]string) error {
+
+func ShowGitIgnoreOption(gitignoreList, selected *[]string, pagesize int) error {
 	prompt := &survey.MultiSelect{
-		Message: multiSelectionMsg,
-		Options: *options,
+		Message: multiSelectMsg,
+		Options: *gitignoreList,
+		PageSize: pagesize,
 	}
 
 	err := survey.AskOne(prompt, selected)

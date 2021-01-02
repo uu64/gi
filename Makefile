@@ -10,7 +10,12 @@ lint:
 	go vet ./...
 	golint -set_exit_status ./...
 
+.PHONY: fmt
+fmt:
+	go fmt ./...
+
 .PHONY: test
 test:
+	go test ./lib/config
 	go test ./lib/gi
 	go test ./lib/github

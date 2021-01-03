@@ -75,10 +75,12 @@ func (gi *Gi) Download(outputPath string, selected []string) ([]*string, error) 
 }
 
 func (gi *Gi) write(path string, contents []*string) error {
-	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
+	file, err := os.Create(path)
 	if err != nil {
 		return err
 	}
+
+	defer file.Close()
 
 	writer := bufio.NewWriter(file)
 

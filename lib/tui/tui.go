@@ -2,8 +2,10 @@ package tui
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/AlecAivazis/survey/v2"
+	"github.com/briandowns/spinner"
 )
 
 const (
@@ -11,6 +13,12 @@ const (
 	inputMsg          = "Output path:"
 	defaultOutputPath = "./.gitignore"
 )
+
+var s *spinner.Spinner
+
+func init() {
+	s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+}
 
 // ShowGitIgnoreOption shows a multi-selection prompt to select gitignores.
 func ShowGitIgnoreOption(gitignoreList, selected *[]string, pagesize int) error {
@@ -41,4 +49,15 @@ func ShowOutputPathInput(input *string) error {
 	}
 
 	return nil
+}
+
+// StartSpinner starts the indicator.
+func StartSpinner(message string) {
+	s.Suffix = message
+	s.Start()
+}
+
+// StopSpinner stops the indicator.
+func StopSpinner() {
+	s.Stop()
 }

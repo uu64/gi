@@ -22,10 +22,12 @@ func main() {
 	vcs := github.NewGithub()
 	cmd := gi.NewGi(vcs, cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref)
 
+	tui.StartSpinner(" loading...")
 	gitignores, err := cmd.ListGitIgnorePath()
 	if err != nil {
 		fail(err)
 	}
+	tui.StopSpinner()
 
 	selected := []string{}
 	err = tui.ShowGitIgnoreOption(&gitignores, &selected, cfg.Tui.PageSize)
@@ -33,7 +35,9 @@ func main() {
 	outputPath := ""
 	err = tui.ShowOutputPathInput(&outputPath)
 
+	tui.StartSpinner(" downloading...")
 	cmd.Download(outputPath, selected)
+	tui.StopSpinner()
 
 	os.Exit(0)
 }

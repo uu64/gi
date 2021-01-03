@@ -10,7 +10,7 @@ import (
 
 const (
 	multiSelectMsg    = "Select gitignore templates:"
-	inputMsg          = "Output path:"
+	inputMsg          = "Input the output path (Existing file will be overwritten):"
 	defaultOutputPath = "./.gitignore"
 )
 

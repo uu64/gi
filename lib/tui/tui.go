@@ -1,6 +1,10 @@
 package tui
 
-import "github.com/AlecAivazis/survey/v2"
+import (
+	"fmt"
+
+	"github.com/AlecAivazis/survey/v2"
+)
 
 const (
 	multiSelectMsg    = "Select gitignore templates:"
@@ -18,7 +22,7 @@ func ShowGitIgnoreOption(gitignoreList, selected *[]string, pagesize int) error 
 
 	err := survey.AskOne(prompt, selected)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to show a multi-selection prompt: %w", err)
 	}
 
 	return nil
@@ -33,7 +37,7 @@ func ShowOutputPathInput(input *string) error {
 
 	err := survey.AskOne(prompt, input)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to show a text input: %w", err)
 	}
 
 	return nil

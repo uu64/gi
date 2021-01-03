@@ -38,7 +38,7 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 	ctx := context.Background()
 	contents, err := gi.vcs.GetTree(ctx, gi.owner, gi.repo, gi.ref, true)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to get a list of remote objects: %w", err)
 	}
 
 	for _, content := range contents {
@@ -51,7 +51,7 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 }
 
 // Download returns the list that contains the decoded content of gitignore.
-func (gi *Gi) Download(outputPath string, selected []string) []*string {
+func (gi *Gi) Download(outputPath string, selected []string) ([]*string, error) {
 	contents := []*string{}
 
 	// TODO: Should be reconsidered if it is empty
@@ -59,29 +59,32 @@ func (gi *Gi) Download(outputPath string, selected []string) []*string {
 
 	for _, item := range selected {
 		sha := pathHashMap[item]
-		content, _ := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, *sha)
+		content, err := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, *sha)
+		if err != nil {
+			return nil, fmt.Errorf("failed to get a blob: %w", err)
+		}
 		contents = append(contents, content)
 	}
-	gi.write(outputPath, contents)
 
-	return contents
+	err := gi.write(outputPath, contents)
+	if err != nil {
+		return nil, fmt.Errorf("failed to write a file: %w", err)
+	}
+
+	return contents, nil
 }
 
 func (gi *Gi) write(path string, contents []*string) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
 	writer := bufio.NewWriter(file)
 
 	for _, content := range contents {
-		fmt.Println(*content)
-		// TODO: error handling
 		_, err := writer.WriteString(*content)
 		if err != nil {
-			fmt.Println(err)
 			return err
 		}
 	}

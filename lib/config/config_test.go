@@ -6,20 +6,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetRemoteConfig(t *testing.T) {
+func TestGet(t *testing.T) {
 	t.Run("can get default values", func(t *testing.T) {
-		rc := GetRemoteConfig()
-		assert.Equal(t, defaultOwner, rc.Owner)
-		assert.Equal(t, defaultRepository, rc.Repository)
-		assert.Equal(t, defaultRef, rc.Ref)
-	})
-	// TODO: add test for values in config file
-}
-
-func TestGetTuiConfig(t *testing.T) {
-	t.Run("can get default values", func(t *testing.T) {
-		tc := GetTuiConfig()
-		assert.Equal(t, defaultPageSize, tc.PageSize)
+		cfg := Get()
+		assert.Equal(t, defaultOwner, cfg.Remote.Owner)
+		assert.Equal(t, defaultRepository, cfg.Remote.Repository)
+		assert.Equal(t, defaultRef, cfg.Remote.Ref)
+		assert.Equal(t, defaultPageSize, cfg.Tui.PageSize)
 	})
 	// TODO: add test for values in config file
 }

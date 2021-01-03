@@ -9,34 +9,34 @@ import (
 	"github.com/spf13/viper"
 )
 
-type config struct {
-	Remote RemoteConfig `mapstructure:"remote"`
-	Tui    TuiConfig    `mapstructure:"tui"`
+// Config contains all configurations used by gi.
+type Config struct {
+	Remote remoteConfig `mapstructure:"remote"`
+	Tui    tuiConfig    `mapstructure:"tui"`
 }
 
-type RemoteConfig struct {
+type remoteConfig struct {
 	Owner      string `mapstructure:"owner"`
 	Repository string `mapstructure:"repository"`
 	Ref        string `mapstructure:"ref"`
 }
 
-type TuiConfig struct {
+type tuiConfig struct {
 	PageSize int `mapstructure:"pagesize"`
 }
 
 const (
+	appName           = "gi"
 	defaultOwner      = "github"
 	defaultRepository = "gitignore"
 	defaultRef        = "master"
 	defaultPageSize   = 20
 )
 
-var c config
+var c Config
 
 func init() {
-	// TODO: app name should be managed
-	viper.AddConfigPath(filepath.Join(getConfigDir(), "gi"))
-
+	viper.AddConfigPath(filepath.Join(getConfigDir(), appName))
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 
@@ -75,10 +75,7 @@ func getConfigDir() string {
 	return configDir
 }
 
-func GetRemoteConfig() RemoteConfig {
-	return c.Remote
-}
-
-func GetTuiConfig() TuiConfig {
-	return c.Tui
+// Get returns a Config object
+func Get() *Config {
+	return &c
 }

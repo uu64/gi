@@ -8,6 +8,7 @@ const (
 	defaultOutputPath = "./.gitignore"
 )
 
+// ShowGitIgnoreOption shows a multi-selection prompt to select gitignores.
 func ShowGitIgnoreOption(gitignoreList, selected *[]string, pagesize int) error {
 	prompt := &survey.MultiSelect{
 		Message:  multiSelectMsg,
@@ -23,6 +24,7 @@ func ShowGitIgnoreOption(gitignoreList, selected *[]string, pagesize int) error 
 	return nil
 }
 
+// ShowOutputPathInput show a text input to input the output path.
 func ShowOutputPathInput(input *string) error {
 	prompt := &survey.Input{
 		Message: inputMsg,

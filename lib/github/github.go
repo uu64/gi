@@ -14,7 +14,7 @@ type Github struct {
 	client *github.Client
 }
 
-// New returns a new Github object.
+// NewGithub returns a new Github object.
 func NewGithub() *Github {
 	return &Github{
 		client: github.NewClient(nil),
@@ -57,8 +57,8 @@ func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (*string
 		return nil, err
 	}
 
-	decoded_content := string(bytes)
-	return &decoded_content, nil
+	decodedContent := string(bytes)
+	return &decodedContent, nil
 }
 
 func getNodeType(treeEntryType string) gi.NodeType {

@@ -19,12 +19,11 @@ jobs:
           go-version: 1.15
       - name: Get dependencies
         run: |
-          apt -y update && apt -y install make
           go get -v -t -d ./...
-          make setup
       - name: Lint
         run: |
-          make lint
+          GO111MODULE=off GOBIN=$(pwd)/bin go get golang.org/x/lint/golint
+          bin/golint -set_exit_status ./...
       - name: Test
         run: |
           make test

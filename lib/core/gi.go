@@ -42,9 +42,10 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 	}
 
 	for _, content := range contents {
-		if *content.Path != gitignoreExt && strings.HasSuffix(*content.Path, gitignoreExt) {
-			pathHashMap[*content.Path] = content.SHA
-			gitignores = append(gitignores, *content.Path)
+		path := *content.Path
+		if path != gitignoreExt && strings.HasSuffix(path, gitignoreExt) {
+			pathHashMap[path] = content.SHA
+			gitignores = append(gitignores, path)
 		}
 	}
 	return gitignores, nil

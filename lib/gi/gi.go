@@ -51,7 +51,7 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 }
 
 // Download returns the list that contains the decoded content of gitignore.
-func (gi *Gi) Download(outputPath string, selected []string) ([]*string, error) {
+func (gi *Gi) Download(outputPath string, selected []string) error {
 	contents := []*string{}
 
 	// TODO: Should be reconsidered if it is empty
@@ -61,17 +61,17 @@ func (gi *Gi) Download(outputPath string, selected []string) ([]*string, error) 
 		sha := pathHashMap[item]
 		content, err := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, *sha)
 		if err != nil {
-			return nil, fmt.Errorf("failed to get a blob: %w", err)
+			return fmt.Errorf("failed to get a blob: %w", err)
 		}
 		contents = append(contents, content)
 	}
 
 	err := gi.write(outputPath, contents)
 	if err != nil {
-		return nil, fmt.Errorf("failed to write a file: %w", err)
+		return fmt.Errorf("failed to write a file: %w", err)
 	}
 
-	return contents, nil
+	return nil
 }
 
 func (gi *Gi) write(path string, contents []*string) error {

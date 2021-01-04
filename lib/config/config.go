@@ -55,8 +55,7 @@ func init() {
 		}
 	}
 
-	err := viper.Unmarshal(&c)
-	if err != nil {
+	if err := viper.Unmarshal(&c); err != nil {
 		fmt.Printf("%+v", err)
 		os.Exit(1)
 	}

@@ -6,7 +6,7 @@ import (
 	"sort"
 
 	"github.com/google/go-github/v33/github"
-	"github.com/uu64/gi/lib/gi"
+	"github.com/uu64/gi/lib/core"
 )
 
 // Github is implementation of the github repository.
@@ -22,8 +22,8 @@ func NewGithub() *Github {
 }
 
 // GetTree returns a slice of contents sorted by the path.
-func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursive bool) ([]*gi.TreeNode, error) {
-	contents := []*gi.TreeNode{}
+func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursive bool) ([]*core.TreeNode, error) {
+	contents := []*core.TreeNode{}
 	opts := new(github.RepositoryContentGetOptions)
 	opts.Ref = ref
 
@@ -33,7 +33,7 @@ func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursiv
 	}
 
 	for _, entry := range tree.Entries {
-		node := gi.NewTreeNode(getNodeType(entry.GetType()), entry.GetPath(), entry.GetSHA())
+		node := core.NewTreeNode(getNodeType(entry.GetType()), entry.GetPath(), entry.GetSHA())
 		contents = append(contents, node)
 	}
 
@@ -60,11 +60,11 @@ func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (*string
 	return &decodedContent, nil
 }
 
-func getNodeType(treeEntryType string) gi.NodeType {
-	nodeTypeMap := map[string]gi.NodeType{
-		"blob":   gi.NtBlob,
-		"tree":   gi.NtTree,
-		"commit": gi.NtSubmodule,
+func getNodeType(treeEntryType string) core.NodeType {
+	nodeTypeMap := map[string]core.NodeType{
+		"blob":   core.NtBlob,
+		"tree":   core.NtTree,
+		"commit": core.NtSubmodule,
 	}
 	return nodeTypeMap[treeEntryType]
 }

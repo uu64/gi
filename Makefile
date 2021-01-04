@@ -17,5 +17,5 @@ fmt:
 .PHONY: test
 test:
 	go test ./lib/config
-	go test ./lib/gi
+	go test ./lib/core
 	go test ./lib/github

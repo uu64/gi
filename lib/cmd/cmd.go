@@ -8,7 +8,7 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
 	"github.com/uu64/gi/lib/config"
-	"github.com/uu64/gi/lib/gi"
+	"github.com/uu64/gi/lib/core"
 	"github.com/uu64/gi/lib/github"
 )
 
@@ -31,7 +31,7 @@ func init() {
 // Start starts the gi command.
 func Start(cfg *config.Config) {
 	vcs := github.NewGithub()
-	cmd := gi.NewGi(vcs, cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref)
+	cmd := core.NewGi(vcs, cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref)
 
 	var options []string
 	var err error

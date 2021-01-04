@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/uu64/gi/lib/gi"
+	"github.com/uu64/gi/lib/core"
 )
 
 func TestNewGithub(t *testing.T) {
@@ -20,29 +20,29 @@ func TestGetTree(t *testing.T) {
 	gh := NewGithub()
 
 	t.Run("can get contents sorted by path (not recursively)", func(t *testing.T) {
-		expected := []*gi.TreeNode{
-			gi.NewTreeNode(
-				gi.NtBlob,
+		expected := []*core.TreeNode{
+			core.NewTreeNode(
+				core.NtBlob,
 				"README.md",
 				"6799dc110eaa15880d42c0b447013c30422dc527"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				".gitmodules",
 				"1a41f17d2c803f43f316adb1cf07e6b9cbfbda3d"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				"LICENSE",
 				"c46410aef77ff7fbe2f44815ac5ca8fb351d190f"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				"testdocument.txt",
 				"d6455f8dde4bd5300e65467b170f7485f4ab77e7"),
-			gi.NewTreeNode(
-				gi.NtTree,
+			core.NewTreeNode(
+				core.NtTree,
 				"docs",
 				"633ec3e50dafa8ca1d9b87763fd2bf1f90dd77b1"),
-			gi.NewTreeNode(
-				gi.NtSubmodule,
+			core.NewTreeNode(
+				core.NtSubmodule,
 				"ghapi-test",
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
@@ -66,33 +66,33 @@ func TestGetTree(t *testing.T) {
 	})
 
 	t.Run("can get all contents sorted by the path", func(t *testing.T) {
-		expected := []*gi.TreeNode{
-			gi.NewTreeNode(
-				gi.NtBlob,
+		expected := []*core.TreeNode{
+			core.NewTreeNode(
+				core.NtBlob,
 				"README.md",
 				"6799dc110eaa15880d42c0b447013c30422dc527"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				".gitmodules",
 				"1a41f17d2c803f43f316adb1cf07e6b9cbfbda3d"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				"LICENSE",
 				"c46410aef77ff7fbe2f44815ac5ca8fb351d190f"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				"testdocument.txt",
 				"d6455f8dde4bd5300e65467b170f7485f4ab77e7"),
-			gi.NewTreeNode(
-				gi.NtBlob,
+			core.NewTreeNode(
+				core.NtBlob,
 				"docs/testdocument.txt",
 				"a0f31e800f7bb4493ad94210b9f1770f6334531f"),
-			gi.NewTreeNode(
-				gi.NtTree,
+			core.NewTreeNode(
+				core.NtTree,
 				"docs",
 				"633ec3e50dafa8ca1d9b87763fd2bf1f90dd77b1"),
-			gi.NewTreeNode(
-				gi.NtSubmodule,
+			core.NewTreeNode(
+				core.NtSubmodule,
 				"ghapi-test",
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}

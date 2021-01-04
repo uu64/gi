@@ -1,4 +1,4 @@
-package gi
+package core
 
 import (
 	"bufio"
@@ -12,7 +12,7 @@ const gitignoreExt = ".gitignore"
 
 var pathHashMap = make(map[string]*string)
 
-// Gi is the object containing everything required to run gi.
+// Gi is the object to handle data of the remote repository.
 type Gi struct {
 	vcs   VCS
 	owner string

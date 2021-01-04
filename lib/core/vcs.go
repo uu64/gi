@@ -1,4 +1,4 @@
-package gi
+package core
 
 import "context"
 

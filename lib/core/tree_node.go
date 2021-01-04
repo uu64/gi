@@ -1,4 +1,4 @@
-package gi
+package core
 
 // NodeType indicates the type of TreeNode object.
 type NodeType int

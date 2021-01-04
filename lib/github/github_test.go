@@ -9,13 +9,6 @@ import (
 	"github.com/uu64/gi/lib/core"
 )
 
-func TestNewGithub(t *testing.T) {
-	t.Run("can get a new Github object", func(t *testing.T) {
-		// TODO: add test
-		t.Skip()
-	})
-}
-
 func TestGetTree(t *testing.T) {
 	gh := NewGithub()
 

@@ -14,5 +14,4 @@ func TestGet(t *testing.T) {
 		assert.Equal(t, defaultRef, cfg.Remote.Ref)
 		assert.Equal(t, defaultPageSize, cfg.Tui.PageSize)
 	})
-	// TODO: add test for values in config file
 }

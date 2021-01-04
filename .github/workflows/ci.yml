@@ -19,6 +19,7 @@ jobs:
           go-version: 1.15
       - name: Get dependencies
         run: |
+          apt -y update && apt -y install make
           go get -v -t -d ./...
           make setup
       - name: Lint

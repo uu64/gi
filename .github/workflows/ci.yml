@@ -20,6 +20,7 @@ jobs:
       - name: Get dependencies
         run: |
           go get -v -t -d ./...
+          make setup
       - name: Lint
         run: |
           make lint

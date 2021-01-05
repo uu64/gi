@@ -4,39 +4,45 @@ import (
 	"bufio"
 	"context"
 	"fmt"
-	"os"
+	"io"
 	"strings"
 )
+
+// Repository is the place that stores gitignore files
+type Repository interface {
+	// GetTree returns contents sorted by the path.
+	GetTree(ctx context.Context, recursive bool) ([]*TreeNode, error)
+	// GetBlob returns the decoded content of the specified SHA.
+	GetBlob(ctx context.Context, sha string) ([]byte, error)
+}
+
+// Gi is the object to handle data of the remote repository.
+type Gi struct {
+	repository Repository
+	owner      string
+	repo       string
+	ref        string
+}
+
+// NewGi returns a new Gi object.
+func NewGi(repo Repository) *Gi {
+	gi := Gi{
+		repository: repo,
+	}
+	return &gi
+}
 
 const gitignoreExt = ".gitignore"
 
 var pathHashMap = make(map[string]*string)
 
-// Gi is the object to handle data of the remote repository.
-type Gi struct {
-	vcs   VCS
-	owner string
-	repo  string
-	ref   string
-}
-
-// NewGi returns a new Gi object.
-func NewGi(vcs VCS, owner, repo, ref string) *Gi {
-	gi := Gi{
-		vcs:   vcs,
-		owner: owner,
-		repo:  repo,
-		ref:   ref,
-	}
-	return &gi
-}
-
 // ListGitIgnorePath returns the list that contains the filepath of gitignore.
 func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 	gitignores := []string{}
 
+	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
-	contents, err := gi.vcs.GetTree(ctx, gi.owner, gi.repo, gi.ref, true)
+	contents, err := gi.repository.GetTree(ctx, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get a list of remote objects: %w", err)
 	}
@@ -51,47 +57,26 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 	return gitignores, nil
 }
 
-// Download returns the list that contains the decoded content of gitignore.
-func (gi *Gi) Download(outputPath string, selected []string) error {
-	contents := []*string{}
+// Download get the content of selected files and writes them merged.
+func (gi *Gi) Download(selected []string, w io.Writer) error {
+	writer := bufio.NewWriter(w)
 
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
 
 	for _, item := range selected {
 		sha := pathHashMap[item]
-		content, err := gi.vcs.GetBlob(ctx, gi.owner, gi.repo, *sha)
+		content, err := gi.repository.GetBlob(ctx, *sha)
 		if err != nil {
 			return fmt.Errorf("failed to get a blob: %w", err)
 		}
-		contents = append(contents, content)
+		writer.WriteString(fmt.Sprintf("# %s\n", item))
+		writer.Write(content)
 	}
 
-	err := gi.write(outputPath, contents)
+	err := writer.Flush()
 	if err != nil {
 		return fmt.Errorf("failed to write a file: %w", err)
 	}
-
-	return nil
-}
-
-func (gi *Gi) write(path string, contents []*string) error {
-	file, err := os.Create(path)
-	if err != nil {
-		return err
-	}
-
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-
-	for _, content := range contents {
-		_, err := writer.WriteString(*content)
-		if err != nil {
-			return err
-		}
-	}
-
-	writer.Flush()
 	return nil
 }

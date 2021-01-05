@@ -9,25 +9,35 @@ import (
 	"github.com/uu64/gi/lib/core"
 )
 
-// Github is implementation of the github repository.
-type Github struct {
+// Repository is implementation of the github repository.
+type Repository struct {
 	client *github.Client
+	owner  string
+	name   string
+	branch string
 }
 
-// NewGithub returns a new Github object.
-func NewGithub() *Github {
-	return &Github{
+// NewRepository returns a new Github object.
+func NewRepository(owner, name, branch string) *Repository {
+	return &Repository{
 		client: github.NewClient(nil),
+		owner:  owner,
+		name:   name,
+		branch: branch,
 	}
 }
 
-// GetTree returns a slice of contents sorted by the path.
-func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursive bool) ([]*core.TreeNode, error) {
+// GetTree returns contents sorted by the path.
+func (gh *Repository) GetTree(ctx context.Context, recursive bool) ([]*core.TreeNode, error) {
 	contents := []*core.TreeNode{}
-	opts := new(github.RepositoryContentGetOptions)
-	opts.Ref = ref
 
-	tree, _, err := gh.client.Git.GetTree(ctx, owner, repo, ref, recursive)
+	branch, _, err := gh.client.Repositories.GetBranch(ctx, gh.owner, gh.name, gh.branch)
+	if err != nil {
+		return nil, err
+	}
+
+	treeSHA := branch.Commit.Commit.Tree.SHA
+	tree, _, err := gh.client.Git.GetTree(ctx, gh.owner, gh.name, *treeSHA, recursive)
 	if err != nil {
 		return nil, err
 	}
@@ -44,8 +54,8 @@ func (gh *Github) GetTree(ctx context.Context, owner, repo, ref string, recursiv
 }
 
 // GetBlob returns the decoded content of the specified SHA.
-func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (*string, error) {
-	blob, _, err := gh.client.Git.GetBlob(ctx, owner, repo, sha)
+func (gh *Repository) GetBlob(ctx context.Context, sha string) ([]byte, error) {
+	blob, _, err := gh.client.Git.GetBlob(ctx, gh.owner, gh.name, sha)
 	if err != nil {
 		return nil, err
 	}
@@ -56,8 +66,7 @@ func (gh *Github) GetBlob(ctx context.Context, owner, repo, sha string) (*string
 		return nil, err
 	}
 
-	decodedContent := string(bytes)
-	return &decodedContent, nil
+	return bytes, nil
 }
 
 func getNodeType(treeEntryType string) core.NodeType {

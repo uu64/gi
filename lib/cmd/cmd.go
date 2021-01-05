@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -13,14 +14,13 @@ import (
 )
 
 const (
-	multiSelectMsg = "Select gitignore templates:"
-	inputMsg       = "Output path (Existing file will be overwritten):"
-	loadingMsg     = "Loading..."
-	downloadingMsg = "Downloading..."
-	cancelMsg      = "Canceled."
-	successMsg     = "Complete."
-	// TODO: fix path format
-	defaultOutputPath = "./.gitignore"
+	multiSelectMsg    = "Select gitignore templates:"
+	inputMsg          = "Output path (Existing file will be overwritten):"
+	loadingMsg        = "Loading..."
+	downloadingMsg    = "Downloading..."
+	cancelMsg         = "Canceled."
+	successMsg        = "Complete."
+	defaultOutputPath = ".gitignore"
 )
 
 // Cmd is the object that has everything required to show tui.
@@ -36,24 +36,16 @@ type Cmd struct {
 // NewCmd returns a new Cmd object.
 func NewCmd() *Cmd {
 	cfg := config.Get()
-	vcs := github.NewGithub()
+	repo := github.NewRepository(cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref)
+
 	return &Cmd{
-		gi:         core.NewGi(vcs, cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref),
+		gi:         core.NewGi(repo),
 		cfg:        cfg,
 		spinner:    spinner.New(spinner.CharSets[14], 100*time.Millisecond),
 		options:    new([]string),
 		selected:   new([]string),
 		outputPath: new(string),
 	}
-}
-
-func (cmd *Cmd) startSpinner(message string) {
-	cmd.spinner.Suffix = fmt.Sprintf(" %s", message)
-	cmd.spinner.Start()
-}
-
-func (cmd *Cmd) stopSpinner() {
-	cmd.spinner.Stop()
 }
 
 func (cmd *Cmd) fail(err error) {
@@ -72,6 +64,15 @@ func (cmd *Cmd) canceled() {
 func (cmd *Cmd) success() {
 	fmt.Println(successMsg)
 	os.Exit(0)
+}
+
+func (cmd *Cmd) startSpinner(message string) {
+	cmd.spinner.Suffix = fmt.Sprintf(" %s", message)
+	cmd.spinner.Start()
+}
+
+func (cmd *Cmd) stopSpinner() {
+	cmd.spinner.Stop()
 }
 
 // Start starts the gi command.
@@ -114,7 +115,23 @@ func (cmd *Cmd) download() error {
 	cmd.startSpinner(downloadingMsg)
 	defer cmd.stopSpinner()
 
-	return cmd.gi.Download(*cmd.outputPath, *cmd.selected)
+	wd, err := os.Getwd()
+	if err != nil {
+		cmd.fail(fmt.Errorf("failed to get working directory: %w", err))
+	}
+
+	f, err := os.Create(filepath.Join(wd, *cmd.outputPath))
+	if err != nil {
+		return fmt.Errorf("failed to open file: %w", err)
+	}
+	defer f.Close()
+
+	err = cmd.gi.Download(*cmd.selected, f)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (cmd *Cmd) showGitIgnoreOption() error {

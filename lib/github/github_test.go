@@ -10,8 +10,6 @@ import (
 )
 
 func TestGetTree(t *testing.T) {
-	gh := NewGithub()
-
 	t.Run("can get contents sorted by path (not recursively)", func(t *testing.T) {
 		expected := []*core.TreeNode{
 			core.NewTreeNode(
@@ -39,13 +37,12 @@ func TestGetTree(t *testing.T) {
 				"ghapi-test",
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
+
+		gh := NewRepository("uu64", "ghapi-test", "main")
 		ctx := context.Background()
-		owner := "uu64"
-		repo := "ghapi-test"
-		ref := "main"
 		recursive := false
 
-		contents, err := gh.GetTree(ctx, owner, repo, ref, recursive)
+		contents, err := gh.GetTree(ctx, recursive)
 		sort.Slice(expected, func(i, j int) bool {
 			return *expected[i].Path < *expected[j].Path
 		})
@@ -89,13 +86,12 @@ func TestGetTree(t *testing.T) {
 				"ghapi-test",
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
+
+		gh := NewRepository("uu64", "ghapi-test", "main")
 		ctx := context.Background()
-		owner := "uu64"
-		repo := "ghapi-test"
-		ref := "main"
 		recursive := true
 
-		contents, err := gh.GetTree(ctx, owner, repo, ref, recursive)
+		contents, err := gh.GetTree(ctx, recursive)
 		sort.Slice(expected, func(i, j int) bool {
 			return *expected[i].Path < *expected[j].Path
 		})
@@ -109,41 +105,35 @@ func TestGetTree(t *testing.T) {
 	})
 
 	t.Run("get an error when non-existent repository is specified", func(t *testing.T) {
+		gh := NewRepository("uu64", "not-exist", "main")
 		ctx := context.Background()
-		owner := "uu64"
-		repo := "non-existent"
-		ref := "main"
 		recursive := false
 
-		_, err := gh.GetTree(ctx, owner, repo, ref, recursive)
+		_, err := gh.GetTree(ctx, recursive)
 		assert.Error(t, err)
 	})
 }
 
 func TestGetBlob(t *testing.T) {
-	gh := NewGithub()
-
 	t.Run("can get a blob", func(t *testing.T) {
+		gh := NewRepository("uu64", "ghapi-test", "main")
 		ctx := context.Background()
-		owner := "uu64"
-		repo := "ghapi-test"
 		// SHA of docs/testdocument.txt
 		sha := "a0f31e800f7bb4493ad94210b9f1770f6334531f"
 		expected := "This is a test document.\n"
 
-		blob, err := gh.GetBlob(ctx, owner, repo, sha)
+		blob, err := gh.GetBlob(ctx, sha)
 		if assert.NoError(t, err) {
-			assert.Equal(t, expected, *blob)
+			assert.Equal(t, []byte(expected), blob)
 		}
 	})
 
 	t.Run("get an error when non-existent SHA is specified", func(t *testing.T) {
+		gh := NewRepository("uu64", "not-exist", "main")
 		ctx := context.Background()
-		owner := "uu64"
-		repo := "non-existent"
 		sha := "test"
 
-		_, err := gh.GetBlob(ctx, owner, repo, sha)
+		_, err := gh.GetBlob(ctx, sha)
 		assert.Error(t, err)
 	})
 }

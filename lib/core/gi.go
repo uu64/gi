@@ -18,27 +18,23 @@ type Repository interface {
 
 // Gi is the object to handle data of the remote repository.
 type Gi struct {
-	repository Repository
-	owner      string
-	repo       string
-	ref        string
+	repository  Repository
+	pathHashMap map[string]*string
 }
 
 // NewGi returns a new Gi object.
 func NewGi(repo Repository) *Gi {
 	gi := Gi{
-		repository: repo,
+		repository:  repo,
+		pathHashMap: make(map[string]*string),
 	}
 	return &gi
 }
 
-const gitignoreExt = ".gitignore"
-
-var pathHashMap = make(map[string]*string)
-
 // ListGitIgnorePath returns the list that contains the filepath of gitignore.
 func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 	gitignores := []string{}
+	gitignoreExt := ".gitignore"
 
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
@@ -51,7 +47,7 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 	for _, content := range contents {
 		path := *content.Path
 		if path != gitignoreExt && strings.HasSuffix(path, gitignoreExt) {
-			pathHashMap[path] = content.SHA
+			gi.pathHashMap[path] = content.SHA
 			gitignores = append(gitignores, path)
 		}
 	}
@@ -66,7 +62,7 @@ func (gi *Gi) Download(selected []string, w io.Writer) error {
 	ctx := context.Background()
 
 	for _, item := range selected {
-		sha := pathHashMap[item]
+		sha := gi.pathHashMap[item]
 		content, err := gi.repository.GetBlob(ctx, *sha)
 		if err != nil {
 			return fmt.Errorf("failed to get a blob: %w", err)

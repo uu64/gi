@@ -16,6 +16,4 @@ fmt:
 
 .PHONY: test
 test:
-	go test ./lib/config
-	go test ./lib/core
-	go test ./lib/github
+	go test ./... --count=1

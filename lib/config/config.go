@@ -13,6 +13,7 @@ import (
 type Config struct {
 	Remote remoteConfig `mapstructure:"remote"`
 	Tui    tuiConfig    `mapstructure:"tui"`
+	Auth   authConfig   `mapstructure:"auth"`
 }
 
 type remoteConfig struct {
@@ -25,12 +26,17 @@ type tuiConfig struct {
 	PageSize int `mapstructure:"pagesize"`
 }
 
+type authConfig struct {
+	Token string `mapstructure:"token"`
+}
+
 const (
 	appName           = "gi"
 	defaultOwner      = "github"
 	defaultRepository = "gitignore"
 	defaultRef        = "master"
 	defaultPageSize   = 20
+	defaultToken      = ""
 )
 
 var c Config
@@ -45,6 +51,7 @@ func init() {
 	viper.SetDefault("remote.repository", defaultRepository)
 	viper.SetDefault("remote.ref", defaultRef)
 	viper.SetDefault("tui.pagesize", defaultPageSize)
+	viper.SetDefault("auth.token", defaultToken)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

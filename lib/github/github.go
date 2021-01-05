@@ -3,10 +3,12 @@ package github
 import (
 	"context"
 	"encoding/base64"
+	"net/http"
 	"sort"
 
 	"github.com/google/go-github/v33/github"
 	"github.com/uu64/gi/lib/core"
+	"golang.org/x/oauth2"
 )
 
 // Repository is implementation of the github repository.
@@ -18,9 +20,19 @@ type Repository struct {
 }
 
 // NewRepository returns a new Github object.
-func NewRepository(owner, name, branch string) *Repository {
+func NewRepository(owner, name, branch, token string) *Repository {
+	hc := new(http.Client)
+
+	if token != "" {
+		ctx := context.Background()
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: token},
+		)
+		hc = oauth2.NewClient(ctx, ts)
+	}
+
 	return &Repository{
-		client: github.NewClient(nil),
+		client: github.NewClient(hc),
 		owner:  owner,
 		name:   name,
 		branch: branch,

@@ -36,7 +36,7 @@ type Cmd struct {
 // NewCmd returns a new Cmd object.
 func NewCmd() *Cmd {
 	cfg := config.Get()
-	repo := github.NewRepository(cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref, cfg.Auth.Token)
+	repo := github.NewRepository(cfg.Repo.Owner, cfg.Repo.Name, cfg.Repo.Branch, cfg.Auth.Token)
 
 	return &Cmd{
 		gi:         core.NewGi(repo),

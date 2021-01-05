@@ -11,32 +11,32 @@ import (
 
 // Config contains all configurations used by gi.
 type Config struct {
-	Remote remoteConfig `mapstructure:"remote"`
-	Tui    tuiConfig    `mapstructure:"tui"`
-	Auth   authConfig   `mapstructure:"auth"`
-}
-
-type remoteConfig struct {
-	Owner      string `mapstructure:"owner"`
-	Repository string `mapstructure:"repository"`
-	Ref        string `mapstructure:"ref"`
-}
-
-type tuiConfig struct {
-	PageSize int `mapstructure:"pagesize"`
+	Auth authConfig `mapstructure:"auth"`
+	Repo repoConfig `mapstructure:"repo"`
+	Tui  tuiConfig  `mapstructure:"tui"`
 }
 
 type authConfig struct {
 	Token string `mapstructure:"token"`
 }
 
+type repoConfig struct {
+	Owner  string `mapstructure:"owner"`
+	Name   string `mapstructure:"name"`
+	Branch string `mapstructure:"branch"`
+}
+
+type tuiConfig struct {
+	PageSize int `mapstructure:"pagesize"`
+}
+
 const (
-	appName           = "gi"
-	defaultOwner      = "github"
-	defaultRepository = "gitignore"
-	defaultRef        = "master"
-	defaultPageSize   = 20
-	defaultToken      = ""
+	appName         = "gi"
+	defaultOwner    = "github"
+	defaultName     = "gitignore"
+	defaultBranch   = "master"
+	defaultPageSize = 20
+	defaultToken    = ""
 )
 
 var c Config
@@ -47,11 +47,11 @@ func init() {
 	viper.SetConfigType("yaml")
 
 	// Set default values
-	viper.SetDefault("remote.owner", defaultOwner)
-	viper.SetDefault("remote.repository", defaultRepository)
-	viper.SetDefault("remote.ref", defaultRef)
-	viper.SetDefault("tui.pagesize", defaultPageSize)
 	viper.SetDefault("auth.token", defaultToken)
+	viper.SetDefault("repo.owner", defaultOwner)
+	viper.SetDefault("repo.name", defaultName)
+	viper.SetDefault("repo.branch", defaultBranch)
+	viper.SetDefault("tui.pagesize", defaultPageSize)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

@@ -14,55 +14,54 @@ import (
 
 const (
 	multiSelectMsg = "Select gitignore templates:"
-	inputMsg       = "Input the output path (Existing file will be overwritten):"
+	inputMsg       = "Output path (Existing file will be overwritten):"
 	loadingMsg     = "Loading..."
 	downloadingMsg = "Downloading..."
-	cancelMsg      = "Canceled"
+	cancelMsg      = "Canceled."
+	successMsg     = "Complete."
 	// TODO: fix path format
 	defaultOutputPath = "./.gitignore"
 )
 
-var s *spinner.Spinner
-
-func init() {
-	s = spinner.New(spinner.CharSets[14], 100*time.Millisecond)
+// Cmd is the object that has everything required to show tui.
+type Cmd struct {
+	gi         *core.Gi
+	cfg        *config.Config
+	spinner    *spinner.Spinner
+	options    *[]string
+	selected   *[]string
+	outputPath *string
 }
 
-// Start starts the gi command.
-func Start(cfg *config.Config) {
+// NewCmd returns a new Cmd object.
+func NewCmd() *Cmd {
+	cfg := config.Get()
 	vcs := github.NewGithub()
-	cmd := core.NewGi(vcs, cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref)
-
-	var options []string
-	var err error
-
-	wait(loadingMsg, func() {
-		if options, err = cmd.ListGitIgnorePath(); err != nil {
-			fail(err)
-		}
-	})
-
-	selected := []string{}
-	showGitIgnoreOption(&options, &selected, cfg.Tui.PageSize)
-
-	outputPath := ""
-	showOutputPathInput(&outputPath)
-
-	wait(downloadingMsg, func() {
-		if err = cmd.Download(outputPath, selected); err != nil {
-			fail(err)
-		}
-	})
-
-	os.Exit(0)
+	return &Cmd{
+		gi:         core.NewGi(vcs, cfg.Remote.Owner, cfg.Remote.Repository, cfg.Remote.Ref),
+		cfg:        cfg,
+		spinner:    spinner.New(spinner.CharSets[14], 100*time.Millisecond),
+		options:    new([]string),
+		selected:   new([]string),
+		outputPath: new(string),
+	}
 }
 
-func fail(err error) {
+func (cmd *Cmd) startSpinner(message string) {
+	cmd.spinner.Suffix = fmt.Sprintf(" %s", message)
+	cmd.spinner.Start()
+}
+
+func (cmd *Cmd) stopSpinner() {
+	cmd.spinner.Stop()
+}
+
+func (cmd *Cmd) fail(err error) {
 	fmt.Printf("%+v", err)
 	os.Exit(1)
 }
 
-func cancelled() {
+func (cmd *Cmd) canceled() {
 	if r := recover(); r != nil {
 		// Command was cancelld on CTRL+C
 		fmt.Println(cancelMsg)
@@ -70,38 +69,79 @@ func cancelled() {
 	}
 }
 
-func wait(message string, fn func()) {
-	s.Suffix = fmt.Sprintf(" %s", message)
-	s.Start()
-
-	fn()
-
-	s.Stop()
+func (cmd *Cmd) success() {
+	fmt.Println(successMsg)
+	os.Exit(0)
 }
 
-func showGitIgnoreOption(gitignoreList, selected *[]string, pagesize int) error {
-	prompt := &survey.MultiSelect{
-		Message:  multiSelectMsg,
-		Options:  *gitignoreList,
-		PageSize: pagesize,
+// Start starts the gi command.
+func (cmd *Cmd) Start() {
+	var err error
+
+	if err = cmd.loadOptions(); err != nil {
+		cmd.fail(err)
 	}
 
-	defer cancelled()
-	if err := survey.AskOne(prompt, selected); err != nil {
+	if err = cmd.showGitIgnoreOption(); err != nil {
+		cmd.fail(err)
+	}
+
+	if err = cmd.showOutputPathInput(); err != nil {
+		cmd.fail(err)
+	}
+
+	if err = cmd.download(); err != nil {
+		cmd.fail(err)
+	}
+
+	cmd.success()
+}
+
+func (cmd *Cmd) loadOptions() error {
+	cmd.startSpinner(loadingMsg)
+	defer cmd.stopSpinner()
+
+	res, err := cmd.gi.ListGitIgnorePath()
+	if err != nil {
+		return err
+	}
+
+	cmd.options = &res
+	return nil
+}
+
+func (cmd *Cmd) download() error {
+	cmd.startSpinner(downloadingMsg)
+	defer cmd.stopSpinner()
+
+	return cmd.gi.Download(*cmd.outputPath, *cmd.selected)
+}
+
+func (cmd *Cmd) showGitIgnoreOption() error {
+	prompt := &survey.MultiSelect{
+		Message:  multiSelectMsg,
+		Options:  *cmd.options,
+		PageSize: cmd.cfg.Tui.PageSize,
+	}
+
+	defer cmd.canceled()
+	err := survey.AskOne(prompt, cmd.selected, survey.WithValidator(survey.Required))
+	if err != nil {
 		return fmt.Errorf("failed to show a multi-selection prompt: %w", err)
 	}
 
 	return nil
 }
 
-func showOutputPathInput(input *string) error {
+func (cmd *Cmd) showOutputPathInput() error {
 	prompt := &survey.Input{
 		Message: inputMsg,
 		Default: defaultOutputPath,
 	}
 
-	defer cancelled()
-	if err := survey.AskOne(prompt, input); err != nil {
+	defer cmd.canceled()
+	err := survey.AskOne(prompt, cmd.outputPath)
+	if err != nil {
 		return fmt.Errorf("failed to show a text input: %w", err)
 	}
 

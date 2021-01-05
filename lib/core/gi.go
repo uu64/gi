@@ -42,6 +42,7 @@ func (gi *Gi) ListGitIgnorePath() ([]string, error) {
 
 	// TODO: Should be reconsidered if it is empty
 	ctx := context.Background()
+
 	contents, err := gi.repository.GetTree(ctx, true)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get a list of remote objects: %w", err)
@@ -72,6 +73,7 @@ func (gi *Gi) Download(selected []string, w io.Writer) error {
 		}
 		writer.WriteString(fmt.Sprintf("# %s\n", item))
 		writer.Write(content)
+		writer.WriteString(fmt.Sprintf("\n"))
 	}
 
 	err := writer.Flush()

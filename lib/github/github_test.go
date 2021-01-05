@@ -10,7 +10,7 @@ import (
 	"github.com/uu64/gi/lib/core"
 )
 
-var GiTestToken = os.Getenv("GI_TEST_TOKEN")
+var giTestToken = os.Getenv("GI_TEST_TOKEN")
 
 func TestGetTree(t *testing.T) {
 	t.Run("can get contents sorted by path (not recursively)", func(t *testing.T) {
@@ -41,7 +41,7 @@ func TestGetTree(t *testing.T) {
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
 
-		gh := NewRepository("uu64", "ghapi-test", "main", GiTestToken)
+		gh := NewRepository("uu64", "ghapi-test", "main", giTestToken)
 		ctx := context.Background()
 		recursive := false
 
@@ -91,7 +91,7 @@ func TestGetTree(t *testing.T) {
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
 
-		gh := NewRepository("uu64", "ghapi-test", "main", GiTestToken)
+		gh := NewRepository("uu64", "ghapi-test", "main", giTestToken)
 		ctx := context.Background()
 		recursive := true
 
@@ -141,7 +141,7 @@ func TestGetTree(t *testing.T) {
 				"017bdc26adbd7c544b2180ab947857ff98d8434f"),
 		}
 
-		gh := NewRepository("uu64", "ghapi-test", "feature/not-main", GiTestToken)
+		gh := NewRepository("uu64", "ghapi-test", "feature/not-main", giTestToken)
 		ctx := context.Background()
 		recursive := true
 
@@ -160,7 +160,7 @@ func TestGetTree(t *testing.T) {
 	})
 
 	t.Run("get an error when non-existent repository is specified", func(t *testing.T) {
-		gh := NewRepository("uu64", "not-exist", "main", GiTestToken)
+		gh := NewRepository("uu64", "not-exist", "main", giTestToken)
 		ctx := context.Background()
 		recursive := false
 
@@ -171,7 +171,7 @@ func TestGetTree(t *testing.T) {
 
 func TestGetBlob(t *testing.T) {
 	t.Run("can get a blob", func(t *testing.T) {
-		gh := NewRepository("uu64", "ghapi-test", "main", GiTestToken)
+		gh := NewRepository("uu64", "ghapi-test", "main", giTestToken)
 		ctx := context.Background()
 		// SHA of docs/testdocument.txt
 		sha := "a0f31e800f7bb4493ad94210b9f1770f6334531f"
@@ -184,7 +184,7 @@ func TestGetBlob(t *testing.T) {
 	})
 
 	t.Run("can get a blob in feature branch", func(t *testing.T) {
-		gh := NewRepository("uu64", "ghapi-test", "feature/not-main", GiTestToken)
+		gh := NewRepository("uu64", "ghapi-test", "feature/not-main", giTestToken)
 		ctx := context.Background()
 		// SHA of docs/testdocument.txt
 		sha := "802f4ed1f1e64021f0918422ad75a8545e344010"
@@ -197,7 +197,7 @@ func TestGetBlob(t *testing.T) {
 	})
 
 	t.Run("get an error when non-existent SHA is specified", func(t *testing.T) {
-		gh := NewRepository("uu64", "not-exist", "main", GiTestToken)
+		gh := NewRepository("uu64", "not-exist", "main", giTestToken)
 		ctx := context.Background()
 		sha := "test"
 

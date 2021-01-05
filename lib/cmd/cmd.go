@@ -50,6 +50,7 @@ func NewCmd() *Cmd {
 
 func (cmd *Cmd) fail(err error) {
 	fmt.Printf("%+v", err)
+	fmt.Println()
 	os.Exit(1)
 }
 

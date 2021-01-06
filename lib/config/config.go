@@ -12,9 +12,9 @@ import (
 
 // Config contains all configurations used by gi.
 type Config struct {
-	Auth authConfig `mapstructure:"auth"`
-	Repo repoConfig `mapstructure:"repo"`
-	Tui  tuiConfig  `mapstructure:"tui"`
+	Auth  authConfig   `mapstructure:"auth"`
+	Repos []repoConfig `mapstructure:"repos"`
+	Tui   tuiConfig    `mapstructure:"tui"`
 }
 
 type authConfig struct {
@@ -40,6 +40,14 @@ const (
 	defaultToken    = ""
 )
 
+var defaultRepos = []repoConfig{
+	{
+		Owner:  defaultOwner,
+		Name:   defaultName,
+		Branch: defaultBranch,
+	},
+}
+
 var c Config
 
 func init() {
@@ -49,10 +57,8 @@ func init() {
 
 	// Set default values
 	viper.SetDefault("auth.token", defaultToken)
-	viper.SetDefault("repo.owner", defaultOwner)
-	viper.SetDefault("repo.name", defaultName)
-	viper.SetDefault("repo.branch", defaultBranch)
 	viper.SetDefault("tui.pagesize", defaultPageSize)
+	viper.SetDefault("repos", defaultRepos)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {

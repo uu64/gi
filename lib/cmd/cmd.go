@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 )
 
 const (
+	selectMsg         = "Select repository:"
 	multiSelectMsg    = "Select gitignore templates:"
 	inputMsg          = "Output path (Existing file will be overwritten):"
 	loadingMsg        = "Loading..."
@@ -36,10 +38,11 @@ type Cmd struct {
 // NewCmd returns a new Cmd object.
 func NewCmd() *Cmd {
 	cfg := config.Get()
-	repo := github.NewRepository(cfg.Repo.Owner, cfg.Repo.Name, cfg.Repo.Branch, cfg.Auth.Token)
+	// repo := github.NewRepository(cfg.Repos.Owner, cfg.Repos.Name, cfg.Repos.Branch, cfg.Auth.Token)
 
 	return &Cmd{
-		gi:         core.NewGi(repo),
+		// gi:         core.NewGi(repo),
+		gi:         nil,
 		cfg:        cfg,
 		spinner:    spinner.New(spinner.CharSets[14], 100*time.Millisecond),
 		options:    new([]string),
@@ -80,6 +83,10 @@ func (cmd *Cmd) stopSpinner() {
 func (cmd *Cmd) Start() {
 	var err error
 
+	if err = cmd.showRepositoryOption(); err != nil {
+		cmd.fail(err)
+	}
+
 	if err = cmd.loadOptions(); err != nil {
 		cmd.fail(err)
 	}
@@ -100,6 +107,10 @@ func (cmd *Cmd) Start() {
 }
 
 func (cmd *Cmd) loadOptions() error {
+	if cmd.gi == nil {
+		return errors.New("repository is not selected")
+	}
+
 	cmd.startSpinner(loadingMsg)
 	defer cmd.stopSpinner()
 
@@ -113,6 +124,10 @@ func (cmd *Cmd) loadOptions() error {
 }
 
 func (cmd *Cmd) download() error {
+	if *cmd.outputPath == "" {
+		return errors.New("output path is not selected")
+	}
+
 	cmd.startSpinner(downloadingMsg)
 	defer cmd.stopSpinner()
 
@@ -132,6 +147,33 @@ func (cmd *Cmd) download() error {
 		return err
 	}
 
+	return nil
+}
+
+func (cmd *Cmd) showRepositoryOption() error {
+	options := []string{}
+	for _, repo := range cmd.cfg.Repos {
+		options = append(options,
+			fmt.Sprintf("%s/%s (%s)", repo.Owner, repo.Name, repo.Branch))
+	}
+
+	prompt := &survey.Select{
+		Message:  selectMsg,
+		Options:  options,
+		PageSize: cmd.cfg.Tui.PageSize,
+		Default:  0,
+	}
+
+	defer cmd.canceled()
+	selected := new(int)
+	err := survey.AskOne(prompt, selected)
+	if err != nil {
+		return fmt.Errorf("failed to show a selection prompt: %w", err)
+	}
+
+	repo := cmd.cfg.Repos[*selected]
+	cmd.gi = core.NewGi(
+		github.NewRepository(repo.Owner, repo.Name, repo.Branch, cmd.cfg.Auth.Token))
 	return nil
 }
 

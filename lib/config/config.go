@@ -1,6 +1,7 @@
 package config
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -84,4 +85,17 @@ func getConfigDir() string {
 // Get returns a Config object
 func Get() *Config {
 	return &c
+}
+
+// This method reloads config from buffer for testing.
+func reload(buf *bytes.Buffer) error {
+	if err := viper.ReadConfig(buf); err != nil {
+		return err
+	}
+
+	if err := viper.Unmarshal(&c); err != nil {
+		return err
+	}
+
+	return nil
 }

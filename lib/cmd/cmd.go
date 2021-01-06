@@ -23,7 +23,7 @@ const (
 	defaultOutputPath = ".gitignore"
 )
 
-// Cmd is the object that has everything required to show tui.
+// Cmd is the object that has everything required to show CLI.
 type Cmd struct {
 	gi         *core.Gi
 	cfg        *config.Config

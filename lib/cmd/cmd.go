@@ -38,10 +38,8 @@ type Cmd struct {
 // NewCmd returns a new Cmd object.
 func NewCmd() *Cmd {
 	cfg := config.Get()
-	// repo := github.NewRepository(cfg.Repos.Owner, cfg.Repos.Name, cfg.Repos.Branch, cfg.Auth.Token)
-
 	return &Cmd{
-		// gi:         core.NewGi(repo),
+		// The object gi will be set later.
 		gi:         nil,
 		cfg:        cfg,
 		spinner:    spinner.New(spinner.CharSets[14], 100*time.Millisecond),
@@ -157,21 +155,23 @@ func (cmd *Cmd) showRepositoryOption() error {
 			fmt.Sprintf("%s/%s (%s)", repo.Owner, repo.Name, repo.Branch))
 	}
 
-	prompt := &survey.Select{
-		Message:  selectMsg,
-		Options:  options,
-		PageSize: cmd.cfg.Tui.PageSize,
-		Default:  0,
+	selected := 0
+	// If there is only 1 repository, selection prompt does not shown.
+	if len(cmd.cfg.Repos) != 1 {
+		prompt := &survey.Select{
+			Message:  selectMsg,
+			Options:  options,
+			PageSize: cmd.cfg.Tui.PageSize,
+		}
+
+		defer cmd.canceled()
+		err := survey.AskOne(prompt, &selected)
+		if err != nil {
+			return fmt.Errorf("failed to show a selection prompt: %w", err)
+		}
 	}
 
-	defer cmd.canceled()
-	selected := new(int)
-	err := survey.AskOne(prompt, selected)
-	if err != nil {
-		return fmt.Errorf("failed to show a selection prompt: %w", err)
-	}
-
-	repo := cmd.cfg.Repos[*selected]
+	repo := cmd.cfg.Repos[selected]
 	cmd.gi = core.NewGi(
 		github.NewRepository(repo.Owner, repo.Name, repo.Branch, cmd.cfg.Auth.Token))
 	return nil

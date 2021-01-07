@@ -16,13 +16,13 @@ import (
 )
 
 const (
-	selectMsg      = "Select repository:"
-	multiSelectMsg = "Select gitignore templates:"
-	inputMsg       = "Output path (Existing file will be overwritten):"
-	loadingMsg     = "Loading..."
-	downloadingMsg = "Downloading..."
-	cancelMsg      = "Canceled."
-	// successMsg        = "Complete."
+	selectMsg         = "Select repository:"
+	multiSelectMsg    = "Select gitignore templates:"
+	inputMsg          = "Output path (Existing file will be overwritten):"
+	loadingMsg        = "Loading..."
+	downloadingMsg    = "Downloading..."
+	cancelMsg         = "Canceled."
+	successMsg        = "Complete."
 	defaultOutputPath = ".gitignore"
 )
 
@@ -65,7 +65,7 @@ func (cmd *Cmd) Start(args []string) {
 
 	_, err = flags.ParseArgs(&opt, args)
 	if err != nil {
-		os.Exit(1)
+		cmd.fail()
 	}
 
 	switch {
@@ -74,45 +74,51 @@ func (cmd *Cmd) Start(args []string) {
 		cmd.success()
 	default:
 		if err = cmd.showRepositoryOption(); err != nil {
-			cmd.fail(err)
+			cmd.fail(fmt.Sprintf("%+v", err))
 		}
 
 		if err = cmd.loadOptions(); err != nil {
-			cmd.fail(err)
+			cmd.fail(fmt.Sprintf("%+v", err))
 		}
 
 		if err = cmd.showGitIgnoreOption(); err != nil {
-			cmd.fail(err)
+			cmd.fail(fmt.Sprintf("%+v", err))
 		}
 
 		if err = cmd.showOutputPathInput(); err != nil {
-			cmd.fail(err)
+			cmd.fail(fmt.Sprintf("%+v", err))
 		}
 
 		if err = cmd.download(); err != nil {
-			cmd.fail(err)
+			cmd.fail(fmt.Sprintf("%+v", err))
 		}
 
-		cmd.success()
+		cmd.success(successMsg)
 	}
 }
 
-func (cmd *Cmd) fail(err error) {
-	fmt.Printf("%+v", err)
-	fmt.Println()
+func (cmd *Cmd) success(message ...string) {
+	for _, s := range message {
+		fmt.Println(s)
+	}
+	os.Exit(0)
+}
+
+func (cmd *Cmd) fail(message ...string) {
+	for _, s := range message {
+		fmt.Println(s)
+	}
 	os.Exit(1)
 }
 
-func (cmd *Cmd) canceled() {
+func (cmd *Cmd) canceled(message ...string) {
 	if r := recover(); r != nil {
+		for _, s := range message {
+			fmt.Println(s)
+		}
 		// Command was cancelld on CTRL+C
-		fmt.Println(cancelMsg)
 		os.Exit(0)
 	}
-}
-
-func (cmd *Cmd) success() {
-	os.Exit(0)
 }
 
 func (cmd *Cmd) startSpinner(message string) {
@@ -151,7 +157,7 @@ func (cmd *Cmd) download() error {
 
 	wd, err := os.Getwd()
 	if err != nil {
-		cmd.fail(fmt.Errorf("failed to get working directory: %w", err))
+		cmd.fail(fmt.Sprintf("%+v", fmt.Errorf("failed to get working directory: %w", err)))
 	}
 
 	f, err := os.Create(filepath.Join(wd, *cmd.outputPath))
@@ -204,7 +210,7 @@ func (cmd *Cmd) showGitIgnoreOption() error {
 		PageSize: cmd.cfg.Tui.PageSize,
 	}
 
-	defer cmd.canceled()
+	defer cmd.canceled(cancelMsg)
 	err := survey.AskOne(prompt, cmd.selected, survey.WithValidator(survey.Required))
 	if err != nil {
 		return fmt.Errorf("failed to show a multi-selection prompt: %w", err)
@@ -219,7 +225,7 @@ func (cmd *Cmd) showOutputPathInput() error {
 		Default: defaultOutputPath,
 	}
 
-	defer cmd.canceled()
+	defer cmd.canceled(cancelMsg)
 	err := survey.AskOne(prompt, cmd.outputPath)
 	if err != nil {
 		return fmt.Errorf("failed to show a text input: %w", err)

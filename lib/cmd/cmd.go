@@ -9,21 +9,25 @@ import (
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/briandowns/spinner"
+	"github.com/jessevdk/go-flags"
 	"github.com/uu64/gi/lib/config"
 	"github.com/uu64/gi/lib/core"
 	"github.com/uu64/gi/lib/github"
 )
 
 const (
-	selectMsg         = "Select repository:"
-	multiSelectMsg    = "Select gitignore templates:"
-	inputMsg          = "Output path (Existing file will be overwritten):"
-	loadingMsg        = "Loading..."
-	downloadingMsg    = "Downloading..."
-	cancelMsg         = "Canceled."
-	successMsg        = "Complete."
+	selectMsg      = "Select repository:"
+	multiSelectMsg = "Select gitignore templates:"
+	inputMsg       = "Output path (Existing file will be overwritten):"
+	loadingMsg     = "Loading..."
+	downloadingMsg = "Downloading..."
+	cancelMsg      = "Canceled."
+	// successMsg        = "Complete."
 	defaultOutputPath = ".gitignore"
 )
+
+// Version will be set in build step.
+var Version = "unset"
 
 // Cmd is the object that has everything required to show CLI.
 type Cmd struct {
@@ -39,13 +43,57 @@ type Cmd struct {
 func NewCmd() *Cmd {
 	cfg := config.Get()
 	return &Cmd{
-		// The object gi will be set later.
+		// The gi object will be set after user select a repository.
 		gi:         nil,
 		cfg:        cfg,
 		spinner:    spinner.New(spinner.CharSets[14], 100*time.Millisecond),
 		options:    new([]string),
 		selected:   new([]string),
 		outputPath: new(string),
+	}
+}
+
+// Option is the object that represents command options.
+type Option struct {
+	Version bool `long:"version" description:"Show version"`
+}
+
+// Start starts the gi command.
+func (cmd *Cmd) Start(args []string) {
+	var opt Option
+	var err error
+
+	_, err = flags.ParseArgs(&opt, args)
+	if err != nil {
+		os.Exit(1)
+	}
+
+	switch {
+	case opt.Version:
+		fmt.Println(Version)
+		cmd.success()
+	default:
+		if err = cmd.showRepositoryOption(); err != nil {
+			cmd.fail(err)
+		}
+
+		if err = cmd.loadOptions(); err != nil {
+			cmd.fail(err)
+		}
+
+		if err = cmd.showGitIgnoreOption(); err != nil {
+			cmd.fail(err)
+		}
+
+		if err = cmd.showOutputPathInput(); err != nil {
+			cmd.fail(err)
+		}
+
+		if err = cmd.download(); err != nil {
+			cmd.fail(err)
+		}
+
+		cmd.success()
 	}
 }
 
@@ -64,7 +112,6 @@ func (cmd *Cmd) canceled() {
 }
 
 func (cmd *Cmd) success() {
-	fmt.Println(successMsg)
 	os.Exit(0)
 }
 
@@ -75,33 +122,6 @@ func (cmd *Cmd) startSpinner(message string) {
 
 func (cmd *Cmd) stopSpinner() {
 	cmd.spinner.Stop()
-}
-
-// Start starts the gi command.
-func (cmd *Cmd) Start() {
-	var err error
-
-	if err = cmd.showRepositoryOption(); err != nil {
-		cmd.fail(err)
-	}
-
-	if err = cmd.loadOptions(); err != nil {
-		cmd.fail(err)
-	}
-
-	if err = cmd.showGitIgnoreOption(); err != nil {
-		cmd.fail(err)
-	}
-
-	if err = cmd.showOutputPathInput(); err != nil {
-		cmd.fail(err)
-	}
-
-	if err = cmd.download(); err != nil {
-		cmd.fail(err)
-	}
-
-	cmd.success()
 }
 
 func (cmd *Cmd) loadOptions() error {

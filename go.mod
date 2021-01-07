@@ -6,6 +6,7 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.2.5
 	github.com/briandowns/spinner v1.12.0
 	github.com/google/go-github/v33 v33.0.0
+	github.com/jessevdk/go-flags v1.4.0
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9 // indirect

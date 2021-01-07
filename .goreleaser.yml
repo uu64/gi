@@ -31,7 +31,7 @@ release:
 brews:
   - tap:
       owner: uu64
-      name: gi
+      name: homebrew-tap
     folder: Formula
     homepage: https://github.com/uu64/gi
     description: A simple interactive CLI tool to create a gitignore.

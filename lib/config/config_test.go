@@ -9,7 +9,7 @@ import (
 
 var emptyConfig = []byte(``)
 var correctConfig = []byte(`
-tui:
+cli:
   pagesize: 30
 auth:
   token: 0123456789abc
@@ -28,7 +28,7 @@ func TestGet(t *testing.T) {
 		err := reload(bytes.NewBuffer(emptyConfig))
 		if assert.NoError(t, err) {
 			cfg := Get()
-			assert.Equal(t, defaultPageSize, cfg.Tui.PageSize)
+			assert.Equal(t, defaultPageSize, cfg.Cli.PageSize)
 			assert.Equal(t, defaultToken, cfg.Auth.Token)
 			assert.Len(t, cfg.Repos, 1)
 			assert.Equal(t, defaultOwner, cfg.Repos[0].Owner)
@@ -41,7 +41,7 @@ func TestGet(t *testing.T) {
 		err := reload(bytes.NewBuffer(correctConfig))
 		if assert.NoError(t, err) {
 			cfg := Get()
-			assert.Equal(t, 30, cfg.Tui.PageSize)
+			assert.Equal(t, 30, cfg.Cli.PageSize)
 			assert.Equal(t, "0123456789abc", cfg.Auth.Token)
 			assert.Len(t, cfg.Repos, 2)
 			assert.Equal(t, "uu64", cfg.Repos[0].Owner)

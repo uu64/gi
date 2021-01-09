@@ -14,7 +14,7 @@ import (
 type Config struct {
 	Auth  authConfig   `mapstructure:"auth"`
 	Repos []repoConfig `mapstructure:"repos"`
-	Tui   tuiConfig    `mapstructure:"tui"`
+	Cli   cliConfig    `mapstructure:"cli"`
 }
 
 type authConfig struct {
@@ -27,7 +27,7 @@ type repoConfig struct {
 	Branch string `mapstructure:"branch"`
 }
 
-type tuiConfig struct {
+type cliConfig struct {
 	PageSize int `mapstructure:"pagesize"`
 }
 
@@ -57,7 +57,7 @@ func init() {
 
 	// Set default values
 	viper.SetDefault("auth.token", defaultToken)
-	viper.SetDefault("tui.pagesize", defaultPageSize)
+	viper.SetDefault("cli.pagesize", defaultPageSize)
 	viper.SetDefault("repos", defaultRepos)
 
 	if err := viper.ReadInConfig(); err != nil {

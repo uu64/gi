@@ -187,7 +187,7 @@ func (cmd *Cmd) showRepositoryOption() error {
 		prompt := &survey.Select{
 			Message:  selectMsg,
 			Options:  options,
-			PageSize: cmd.cfg.Tui.PageSize,
+			PageSize: cmd.cfg.Cli.PageSize,
 		}
 
 		defer cmd.canceled()
@@ -207,7 +207,7 @@ func (cmd *Cmd) showGitIgnoreOption() error {
 	prompt := &survey.MultiSelect{
 		Message:  multiSelectMsg,
 		Options:  *cmd.options,
-		PageSize: cmd.cfg.Tui.PageSize,
+		PageSize: cmd.cfg.Cli.PageSize,
 	}
 
 	defer cmd.canceled(cancelMsg)

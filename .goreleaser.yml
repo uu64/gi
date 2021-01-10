@@ -9,8 +9,7 @@ builds:
     binary: gi
     ldflags:
       - -s -w
-      - -X main.Version={{.Version}}
-      - -X main.Revision={{.ShortCommit}}
+      - -X lib/cmd/cmd.Version={{.Version}}
     env:
       - CGO_ENABLED=0
 archives:

@@ -5,4 +5,4 @@
 
 A simple interactive CLI tool to create a gitignore.
 
-[screenshot demo](docs/img/scrennshot.gif)
+![demo](docs/img/scrennshot.gif)

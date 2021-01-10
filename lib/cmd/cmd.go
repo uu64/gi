@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"time"
 
 	"github.com/AlecAivazis/survey/v2"
@@ -24,6 +24,7 @@ const (
 	cancelMsg         = "Canceled."
 	successMsg        = "Complete."
 	defaultOutputPath = ".gitignore"
+	maxSelectLen      = 5
 )
 
 // Version will be set in build step.
@@ -132,7 +133,7 @@ func (cmd *Cmd) stopSpinner() {
 
 func (cmd *Cmd) loadOptions() error {
 	if cmd.gi == nil {
-		return errors.New("repository is not selected")
+		return fmt.Errorf("repository is not selected")
 	}
 
 	cmd.startSpinner(loadingMsg)
@@ -149,7 +150,7 @@ func (cmd *Cmd) loadOptions() error {
 
 func (cmd *Cmd) download() error {
 	if *cmd.outputPath == "" {
-		return errors.New("output path is not selected")
+		return fmt.Errorf("output path is not selected")
 	}
 
 	cmd.startSpinner(downloadingMsg)
@@ -209,9 +210,21 @@ func (cmd *Cmd) showGitIgnoreOption() error {
 		Options:  *cmd.options,
 		PageSize: cmd.cfg.Cli.PageSize,
 	}
+	validator := func(ans interface{}) error {
+		// val's Kind should be Slice
+		val := reflect.ValueOf(ans)
+
+		if val.Len() == 0 {
+			return fmt.Errorf("value is required")
+		}
+		if val.Len() > maxSelectLen {
+			return fmt.Errorf("you can select up to %d", maxSelectLen)
+		}
+		return nil
+	}
 
 	defer cmd.canceled(cancelMsg)
-	err := survey.AskOne(prompt, cmd.selected, survey.WithValidator(survey.Required))
+	err := survey.AskOne(prompt, cmd.selected, survey.WithValidator(validator))
 	if err != nil {
 		return fmt.Errorf("failed to show a multi-selection prompt: %w", err)
 	}

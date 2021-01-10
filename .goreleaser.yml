@@ -9,7 +9,7 @@ builds:
     binary: gi
     ldflags:
       - -s -w
-      - -X lib/cmd/cmd.Version={{.Version}}
+      - -X github.com/uu64/gi/lib/cmd.Version={{.Version}}
     env:
       - CGO_ENABLED=0
 archives:

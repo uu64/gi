@@ -16,13 +16,6 @@ A simple interactive CLI tool to create a gitignore.
     - If multiple templates are selected, they will be merged and output as a single gitignore file.
 
 
-## Demo
-
-![demo1](docs/img/demo1.gif)
-
-![demo2](docs/img/demo2.gif)
-
-
 ## Installation
 
 Download the binary from [GitHub Releases](https://github.com/uu64/gi/releases/latest) and drop it in your `$PATH`.
@@ -74,6 +67,7 @@ repos:
 ### auth.token
 
 Set the value of a personal API token of GitHub.
+
 Default is empty.
 
 `gi` uses the GitHub API v3 which has a rate limit.
@@ -84,6 +78,19 @@ If you encounter a rate limit error, please refer to the following URL to get a 
 ### cli.pagesize
 
 Set the maximum number of lines to display for the prompt to select gitignore templates.
+
+Default is 20.
+
+
+## Demo
+
+Default configuration:
+
+![demo1](docs/img/demo1.gif)
+
+Added your own repository:
+
+![demo2](docs/img/demo2.gif)
 
 
 ## License
